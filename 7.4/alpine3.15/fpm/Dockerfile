@@ -4,7 +4,8 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.15
+FROM cr.loongnix.cn/library/alpine:3.11
+MAINTAINER Xuhui Qiang <qiangxuhui@loongson.cn>
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -30,7 +31,7 @@ RUN apk add --no-cache \
 
 # ensure www-data user exists
 RUN set -eux; \
-	adduser -u 82 -D -S -G www-data www-data
+	addgroup -g 82 -S www-data && adduser -u 82 -D -S -G www-data www-data
 # 82 is the standard uid/gid for "www-data" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
 # https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
@@ -158,9 +159,9 @@ RUN set -eux; \
 # in PHP 7.4+, the pecl/pear installers are officially deprecated (requiring an explicit "--with-pear")
 		--with-pear \
 		\
-# bundled pcre does not support JIT on s390x
+# bundled pcre does not support JIT on loongarch64-linux-musl
 # https://manpages.debian.org/bullseye/libpcre3-dev/pcrejit.3.en.html#AVAILABILITY_OF_JIT_SUPPORT
-		$(test "$gnuArch" = 's390x-linux-musl' && echo '--without-pcre-jit') \
+		$(test "$gnuArch" = 'loongarch64-linux-musl' && echo '--without-pcre-jit') \
 		\
 		--disable-cgi \
 		\
