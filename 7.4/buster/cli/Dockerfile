@@ -4,7 +4,8 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM debian:buster-slim
+FROM cr.loongnix.cn/loongson/loongnix:20
+MAINTAINER Xuhui Qiang <qiangxuhui@loongson.cn>
 
 # prevent Debian's PHP packages from being installed
 # https://github.com/docker-library/php/pull/542
@@ -109,7 +110,7 @@ RUN set -eux; \
 		libsodium-dev \
 		libsqlite3-dev \
 		libssl-dev \
-		libxml2-dev \
+		libxml2 libxml2-dev \
 		zlib1g-dev \
 	; \
 	\
@@ -167,9 +168,9 @@ RUN set -eux; \
 # in PHP 7.4+, the pecl/pear installers are officially deprecated (requiring an explicit "--with-pear")
 		--with-pear \
 		\
-# bundled pcre does not support JIT on s390x
+# bundled pcre does not support JIT on loongarch64-linux-gnu
 # https://manpages.debian.org/bullseye/libpcre3-dev/pcrejit.3.en.html#AVAILABILITY_OF_JIT_SUPPORT
-		$(test "$gnuArch" = 's390x-linux-gnu' && echo '--without-pcre-jit') \
+		$(test "$gnuArch" = 'loongarch64-linux-gnu' && echo '--without-pcre-jit') \
 		--with-libdir="lib/$debMultiarch" \
 		\
 # https://github.com/docker-library/php/pull/939#issuecomment-730501748
@@ -204,14 +205,11 @@ RUN set -eux; \
 		| cut -d: -f1 \
 		| sort -u \
 		| xargs -r apt-mark manual \
-	; \
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+	;\ 
 	rm -rf /var/lib/apt/lists/*; \
-	\
 # update pecl channel definitions https://github.com/docker-library/php/issues/443
 	pecl update-channels; \
 	rm -rf /tmp/pear ~/.pearrc; \
-	\
 # smoke test
 	php --version
 
